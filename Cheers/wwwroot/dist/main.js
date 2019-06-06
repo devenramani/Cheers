@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "1d96e0248f166d0acd24"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "08c954661e2bccc75c6a"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -31829,8 +31829,13 @@ var CheerTimeline = (function (_super) {
         var _this = _super.call(this, props) || this;
         _this.handleShow = _this.handleShow.bind(_this);
         _this.handleClose = _this.handleClose.bind(_this);
+        _this.sendCheer = _this.sendCheer.bind(_this);
+        _this.handleCheerTextChange = _this.handleCheerTextChange.bind(_this);
+        _this.handleCheerToInputText = _this.handleCheerToInputText.bind(_this);
         _this.state = {
-            show: false
+            show: false,
+            cheerTo: '',
+            cheerText: ''
         };
         return _this;
     }
@@ -31839,6 +31844,15 @@ var CheerTimeline = (function (_super) {
     };
     CheerTimeline.prototype.handleShow = function () {
         this.setState({ show: true });
+    };
+    CheerTimeline.prototype.handleCheerToInputText = function (e) {
+        this.setState({ cheerTo: e.target.value });
+    };
+    CheerTimeline.prototype.handleCheerTextChange = function (e) {
+        this.setState({ cheerText: e.target.value });
+    };
+    CheerTimeline.prototype.sendCheer = function () {
+        console.log(this.state.cheerTo + " - " + this.state.cheerText);
     };
     CheerTimeline.prototype.render = function () {
         return (__WEBPACK_IMPORTED_MODULE_0_react__["createElement"]("div", null,
@@ -31851,11 +31865,11 @@ var CheerTimeline = (function (_super) {
                     __WEBPACK_IMPORTED_MODULE_0_react__["createElement"]("form", null,
                         __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["c" /* InputGroup */], null,
                             __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["c" /* InputGroup */].Addon, null, "To: "),
-                            __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["d" /* FormControl */], { type: "text" })),
+                            __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["d" /* FormControl */], { type: "text", onChange: this.handleCheerToInputText })),
                         __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["e" /* FormGroup */], { bsSize: "large" },
-                            __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["d" /* FormControl */], { type: "text", placeholder: "Large text" })))),
+                            __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["d" /* FormControl */], { name: "CheerTextControl", type: "text", placeholder: "Large text", onChange: this.handleCheerTextChange })))),
                 __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["b" /* Modal */].Footer, null,
-                    __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["a" /* Button */], { bsStyle: "primary", onClick: this.handleClose }, "Send"),
+                    __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["a" /* Button */], { bsStyle: "primary", onClick: this.sendCheer }, "Send"),
                     __WEBPACK_IMPORTED_MODULE_0_react__["createElement"](__WEBPACK_IMPORTED_MODULE_1_react_bootstrap__["a" /* Button */], { onClick: this.handleClose }, "Close")))));
     };
     return CheerTimeline;
