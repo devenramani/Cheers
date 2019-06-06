@@ -1,43 +1,32 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
-import { Button, Modal, OverlayTrigger, Popover, Tooltip, FormGroup, InputGroup, FormControl } from 'react-bootstrap';
+import { Panel } from 'react-bootstrap';
+import { Pane } from 'react-bootstrap/lib/Tab';
 
 export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any> {
     constructor(props: any) {
         super(props);
 
-        this.handleShow = this.handleShow.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-        this.sendCheer = this.sendCheer.bind(this);
-        this.handleCheerTextChange = this.handleCheerTextChange.bind(this);
-        this.handleCheerToInputText = this.handleCheerToInputText.bind(this);
-
         this.state = {
-            show: false,
-            cheerTo: '',
-            cheerText: ''
+            allCheers: []
         };
     }
 
-    handleClose() {
-        this.setState({ show: false });
-    }
+    componentDidMount() {
+        let that = this;
+        fetch('api/CheerTimeline/Getallcheers')
+            .then(function (response) {
+                // The response is a Response instance.
+                // You parse the data into a useable format using `.json()`
+                return response.json();
 
-    handleShow() {
-        this.setState({ show: true });
-    }
+            }).then(function (data) {
+                console.log(data);
 
-    handleCheerToInputText(e: any) {
-
-        this.setState({ cheerTo: e.target.value });
-    }
-    handleCheerTextChange(e: any) {
-        this.setState({ cheerText: e.target.value });
-    }
-
-    sendCheer() {
-        console.log(this.state.cheerTo + " - " + this.state.cheerText);
-        
+                that.setState({
+                    allCheers: data.allCheers
+                });
+            });
     }
 
     public render() {
@@ -46,30 +35,20 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
             <div>
                 <h1>Timeline</h1>
 
-                <Button bsStyle="primary" onClick={this.handleShow}>
-                    Send Cheer
-              </Button>
+                {this.state.allCheers.map((cheer: any, i: any) => {
+                    // Return the element. Also pass key     
+                    return (
+                        <Panel key={i} bsStyle="info">
+                            <Panel.Heading>
+                                <Panel.Title componentClass="h3">Cheers to: <h4><b>{cheer.cheerTo}</b></h4></Panel.Title>
+                            </Panel.Heading>
+                            <Panel.Body>{cheer.cheerText}</Panel.Body>
 
-                <Modal show={this.state.show} onHide={this.handleClose}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Cheer!</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <form>
-                            <InputGroup>
-                                <InputGroup.Addon>To: </InputGroup.Addon>
-                                <FormControl type="text" onChange={this.handleCheerToInputText} />
-                            </InputGroup>
-                            <FormGroup bsSize="large">
-                                <FormControl name="CheerTextControl" type="text" placeholder="Large text" onChange={this.handleCheerTextChange} />
-                            </FormGroup>
-                        </form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button bsStyle="primary" onClick={this.sendCheer}>Send</Button>
-                        <Button onClick={this.handleClose}>Close</Button>
-                    </Modal.Footer>
-                </Modal>
+                            <Panel.Footer >by : {cheer.cheerFrom}</Panel.Footer>
+                        </Panel>)
+                })}
+
+
             </div>
         );
     }

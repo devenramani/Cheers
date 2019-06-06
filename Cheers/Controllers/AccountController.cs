@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -10,10 +11,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Protocols;
+using Newtonsoft.Json;
 
 namespace Cheers.Controllers
 {
-
+    [Authorize]
     [Route("api/[controller]")]
     public class AccountController : Controller
     {
@@ -28,7 +30,6 @@ namespace Cheers.Controllers
             return View();
         }
 
-        [Authorize]
         [HttpGet("GetUser")]
         public JsonResult UserIdentity()
         {
@@ -55,7 +56,7 @@ namespace Cheers.Controllers
                 if (record > 0)
                 {
                     connection.Close();
-                    return Json(new { fullName, firstLogin = false });
+                    return Json(new { fullName, UPN, firstLogin = false });
                 }
                 else
                 {
@@ -66,13 +67,45 @@ namespace Cheers.Controllers
                     insertUserDetailsCommand.ExecuteNonQuery();
 
                     connection.Close();
-                    return Json(new { fullName, firstLogin = true });
+
+                    return Json(new { fullName, UPN, firstLogin = true });
 
 
                 }
 
             }
 
+        }
+
+        [HttpGet("GetAllUsers")]
+        public JsonResult GetAllUsers()
+        {
+            string connectionstring = _iconfiguration.GetConnectionString("CheersDbConnection");
+
+            using (SqlConnection connection = new SqlConnection(connectionstring))
+            {
+                connection.Open();
+
+                string getAllUsers = @"SELECT UPN FROM DBO.Users";
+
+                SqlCommand getAllUsersCommand = new SqlCommand(getAllUsers, connection);
+
+                SqlDataReader reader = getAllUsersCommand.ExecuteReader();
+
+                ArrayList allUsers = new ArrayList();
+
+                while (reader.Read())
+                {
+                    allUsers.Add(new
+                    {
+                        UPN = reader["UPN"]
+                    });
+                }
+
+                return Json(new { allUsers });
+            }
+
+           
         }
     }
 }
