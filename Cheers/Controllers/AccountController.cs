@@ -70,7 +70,6 @@ namespace Cheers.Controllers
 
                     return Json(new { fullName, UPN, firstLogin = true });
 
-
                 }
 
             }
