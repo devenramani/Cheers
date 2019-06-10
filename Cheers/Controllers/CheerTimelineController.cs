@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
+using Cheers.DB;
 using Cheers.DB.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,71 +17,47 @@ namespace Cheers.Controllers
     public class CheerTimelineController : Controller
     {
         IConfiguration _iconfiguration;
-        public CheerTimelineController(IConfiguration iconfiguration)
+        CheersDbContext _dbContext;
+        public CheerTimelineController(IConfiguration iconfiguration, CheersDbContext dbContext)
         {
             _iconfiguration = iconfiguration;
+            _dbContext = dbContext;
         }
+
         // GET: api/<controller>
         [HttpGet("GetAllCheers")]
         public JsonResult GetAllCheers()
         {
-            string connectionstring = _iconfiguration.GetConnectionString("CheersDbConnection");
+            var allcheers = _dbContext.CheerTable.Select(c => new { c.CheerID, c.CheerText, c.CheerTo, c.CheerFrom, c.CheerTime }).OrderByDescending(c => c.CheerID);
 
-            using (SqlConnection connection = new SqlConnection(connectionstring))
-            {
-                connection.Open();
-
-                string getAllCheers = @"SELECT * FROM DBO.CheerTable";
-
-                SqlCommand getAllCheersCommand = new SqlCommand(getAllCheers, connection);
-
-                SqlDataReader reader = getAllCheersCommand.ExecuteReader();
-
-                ArrayList allCheers = new ArrayList();
-
-                while (reader.Read())
-                {
-                    allCheers.Add(new
-                    {
-                        CheerID = reader["CheerID"],
-                        CheerText = reader["CheerText"],
-                        CheerTo = reader["CheerTo"],
-                        CheerFrom = reader["CheerFrom"],
-                        CheerTime = reader["CheerTime"]
-                    });
-                }
-
-                return Json(new { allCheers });
-            }
+            return Json(new { allcheers });
         }
 
         // POST api/<controller>
         [HttpPost("SendCheer")]
         public string Post([FromBody]CheerTable cheer)
         {
-            string connectionstring = _iconfiguration.GetConnectionString("CheersDbConnection");
-            try
+            var cheerDetails = new CheerTable
             {
-                using (SqlConnection connection = new SqlConnection(connectionstring))
-                {
-                    connection.Open();
+                CheerFrom = cheer.CheerFrom,
+                CheerTo = cheer.CheerTo,
+                CheerText = cheer.CheerText,
+                CheerTime = cheer.CheerTime
+            };
 
-                    string insertCheer = @"INSERT INTO dbo.CheerTable(CheerFrom,CheerTo,CheerText,CheerTime) VALUES('" + cheer.CheerFrom + "','" + cheer.CheerTo + "','" + cheer.CheerText + "','" + cheer.CheerTime + "')";
+            _dbContext.CheerTable.Add(cheerDetails);
+            var a = _dbContext.SaveChanges();
 
-                    SqlCommand insertCheerCommand = new SqlCommand(insertCheer, connection);
-
-                    insertCheerCommand.ExecuteNonQuery();
-
-                    connection.Close();
-
-                    return "success";
-                }
+            if (a == 1)
+            {
+                return "success";
             }
-            catch (System.Exception)
+            else
             {
-
                 return "fail";
             }
+
+
 
         }
 

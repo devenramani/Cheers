@@ -24,7 +24,7 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
                 console.log(data);
 
                 that.setState({
-                    allCheers: data.allCheers
+                    allCheers: data.allcheers
                 });
             });
     }
@@ -40,14 +40,13 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
                     return (
                         <Panel key={i} bsStyle="info">
                             <Panel.Heading>
-                                <Panel.Title componentClass="h3">Cheers to: <h4><b>{cheer.cheerTo}</b></h4></Panel.Title>
+                                <Panel.Title componentClass="h3">Cheers to: <b>{cheer.cheerTo}</b></Panel.Title>
                             </Panel.Heading>
                             <Panel.Body>{cheer.cheerText}</Panel.Body>
 
                             <Panel.Footer >by : {cheer.cheerFrom}</Panel.Footer>
                         </Panel>)
                 })}
-
 
             </div>
         );

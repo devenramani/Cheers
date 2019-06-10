@@ -7,6 +7,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Cheers.DB;
+using Cheers.DB.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -21,9 +23,12 @@ namespace Cheers.Controllers
     {
 
         IConfiguration _iconfiguration;
-        public AccountController(IConfiguration iconfiguration)
+        CheersDbContext _dbContext;
+        public AccountController(IConfiguration iconfiguration, CheersDbContext dbContext)
         {
             _iconfiguration = iconfiguration;
+            _dbContext = dbContext;
+
         }
         public IActionResult Index()
         {
@@ -35,42 +40,27 @@ namespace Cheers.Controllers
         {
             var identity = User.Identity as ClaimsIdentity;
 
-            string fullName = identity.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
-            string UPN = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("upn"))?.Value;
-            string firstName = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("givenname"))?.Value;
-            string lastName = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("surname"))?.Value;
-            string userGUID = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("objectidentifier"))?.Value;
-
-            string connectionstring = _iconfiguration.GetConnectionString("CheersDbConnection");
-
-            using (SqlConnection connection = new SqlConnection(connectionstring))
+            var user = new User
             {
-                connection.Open();
+                UserGUID = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("objectidentifier"))?.Value,
+                FirstName = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("givenname"))?.Value,
+                LastName = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("surname"))?.Value,
+                UPN = identity.Claims.FirstOrDefault(c => c.Type.EndsWith("upn"))?.Value,
+                FullName = identity.Claims.FirstOrDefault(c => c.Type == "name")?.Value
+            };
 
-                string getUser = @"SELECT Count(*) FROM DBO.Users where UPN='" + UPN + "'";
+            var userCount = _dbContext.Users.Where(u => u.UPN == user.UPN).Count();
 
-                SqlCommand getUserCommand = new SqlCommand(getUser, connection);
+            if (userCount > 0)
+            {
+                return Json(new { user.FullName, user.UPN, firstLogin = false });
+            }
+            else
+            {
+                _dbContext.Users.Add(user);
+                _dbContext.SaveChanges();
 
-                int record = (int)getUserCommand.ExecuteScalar();
-
-                if (record > 0)
-                {
-                    connection.Close();
-                    return Json(new { fullName, UPN, firstLogin = false });
-                }
-                else
-                {
-                    string insertUserDetails = @"INSERT INTO dbo.Users(UserGUID,UPN,FirstName,LastName,FullName) VALUES('" + userGUID + "','" + UPN + "','" + firstName + "','" + lastName + "','" + fullName + "')";
-
-                    SqlCommand insertUserDetailsCommand = new SqlCommand(insertUserDetails, connection);
-
-                    insertUserDetailsCommand.ExecuteNonQuery();
-
-                    connection.Close();
-
-                    return Json(new { fullName, UPN, firstLogin = true });
-
-                }
+                return Json(new { user.FullName, user.UPN, firstLogin = true });
 
             }
 
@@ -79,32 +69,13 @@ namespace Cheers.Controllers
         [HttpGet("GetAllUsers")]
         public JsonResult GetAllUsers()
         {
-            string connectionstring = _iconfiguration.GetConnectionString("CheersDbConnection");
 
-            using (SqlConnection connection = new SqlConnection(connectionstring))
-            {
-                connection.Open();
+            var allUsers = _dbContext.Users.Select(u => new { u.FullName, u.UPN });
 
-                string getAllUsers = @"SELECT UPN FROM DBO.Users";
+            return Json(new { allUsers });
 
-                SqlCommand getAllUsersCommand = new SqlCommand(getAllUsers, connection);
+            
 
-                SqlDataReader reader = getAllUsersCommand.ExecuteReader();
-
-                ArrayList allUsers = new ArrayList();
-
-                while (reader.Read())
-                {
-                    allUsers.Add(new
-                    {
-                        UPN = reader["UPN"]
-                    });
-                }
-
-                return Json(new { allUsers });
-            }
-
-           
         }
     }
 }

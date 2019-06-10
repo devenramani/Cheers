@@ -25,6 +25,9 @@ export class Home extends React.Component<RouteComponentProps<{}>, any> {
     }
 
     componentDidMount() {
+
+        console.log(this.props);
+
         let that = this;
         fetch('api/Account/GetUser')
             .then(function (response) {
@@ -85,7 +88,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, any> {
             body: JSON.stringify({
                 CheerFrom: this.state.UPN,
                 CheerTo: this.state.cheerTo,
-                CheerTime: "time",
+                CheerTime: new Date().toISOString(),
                 CheerText: this.state.cheerText
             })
         }).then(function (data) {
@@ -114,7 +117,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, any> {
                             <option value="select">Select</option>
                                 {this.state.allUsers.map((user: any, i: any) => {
                                     // Return the element. Also pass key     
-                                    return (<option key={i} value={user.upn}>{user.upn}</option>)
+                                    return (<option key={i} value={user.upn}>{user.fullName}</option>)
                                 })}
                             </FormControl>
                         </InputGroup>
