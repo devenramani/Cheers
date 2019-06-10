@@ -4,14 +4,16 @@ using Cheers.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Cheers.DB.Migrations
 {
     [DbContext(typeof(CheersDbContext))]
-    partial class CheersDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190610094857_updated CheerTable Schema")]
+    partial class updatedCheerTableSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,46 +42,6 @@ namespace Cheers.DB.Migrations
                     b.HasIndex("CheerTo");
 
                     b.ToTable("CheerTable");
-                });
-
-            modelBuilder.Entity("Cheers.DB.Models.Feedback", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("From");
-
-                    b.Property<string>("Subject");
-
-                    b.Property<string>("Text");
-
-                    b.Property<DateTime>("TimeStamp");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Feedback");
-                });
-
-            modelBuilder.Entity("Cheers.DB.Models.StartStop", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("From");
-
-                    b.Property<string>("Subject");
-
-                    b.Property<string>("Text");
-
-                    b.Property<DateTime>("TimeStamp");
-
-                    b.Property<string>("Title");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StartStop");
                 });
 
             modelBuilder.Entity("Cheers.DB.Models.User", b =>

@@ -15,7 +15,7 @@ namespace Cheers.DB.Models
         public string CheerFrom { get; set; }
         [ForeignKey("ToUser")]
         public string CheerTo { get; set; }
-        public string CheerTime { get; set; }
+        public DateTime CheerTime { get; set; }
 
         public virtual User FromUser { get; set; }
         public virtual User ToUser { get; set; }
