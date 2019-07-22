@@ -16,11 +16,10 @@ namespace Cheers.Controllers
     [Route("api/[controller]")]
     public class CheerTimelineController : Controller
     {
-        IConfiguration _iconfiguration;
+        
         CheersDbContext _dbContext;
-        public CheerTimelineController(IConfiguration iconfiguration, CheersDbContext dbContext)
+        public CheerTimelineController(CheersDbContext dbContext)
         {
-            _iconfiguration = iconfiguration;
             _dbContext = dbContext;
         }
 
@@ -35,7 +34,7 @@ namespace Cheers.Controllers
 
         // POST api/<controller>
         [HttpPost("SendCheer")]
-        public string Post([FromBody]CheerTable cheer)
+        public string SendCheer([FromBody]CheerTable cheer)
         {
             var cheerDetails = new CheerTable
             {
@@ -46,9 +45,9 @@ namespace Cheers.Controllers
             };
 
             _dbContext.CheerTable.Add(cheerDetails);
-            var a = _dbContext.SaveChanges();
+            var flag = _dbContext.SaveChanges();
 
-            if (a == 1)
+            if (flag == 1)
             {
                 return "success";
             }
@@ -56,8 +55,6 @@ namespace Cheers.Controllers
             {
                 return "fail";
             }
-
-
 
         }
 
