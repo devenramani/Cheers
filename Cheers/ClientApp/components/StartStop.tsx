@@ -137,7 +137,7 @@ export class StartStop extends React.Component<RouteComponentProps<{}>, any> {
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup bsSize="large">
-                                    <FormControl name="CheerTextControl" type="text" placeholder="type here" onChange={this.handleStartStopTextChange} />
+                                    <FormControl name="CheerTextControl" type="text" placeholder="description" onChange={this.handleStartStopTextChange} />
                                 </FormGroup>
                             </form>
                             <Button bsStyle="primary" onClick={this.sendStartStop} >Send</Button>
