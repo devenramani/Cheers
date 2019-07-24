@@ -10,12 +10,12 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
         this.handleCheerTextChange = this.handleCheerTextChange.bind(this);
         this.handleCheerToInputText = this.handleCheerToInputText.bind(this);
         this.sendCheer = this.sendCheer.bind(this);
+        this.getAllCheers = this.getAllCheers.bind(this);
 
         this.state = {
             allCheers: [],
             cheerPanel: false,
             userName: "",
-            show: false,
             cheerTo: '',
             cheerText: '',
             UPN: '',
@@ -26,20 +26,9 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
     componentDidMount() {
 
         let that = this;
-        fetch('api/CheerTimeline/Getallcheers')
-            .then(function (response) {
-                // The response is a Response instance.
-                // You parse the data into a useable format using `.json()`
-                return response.json();
 
-            }).then(function (data) {
-                console.log(data);
-
-                that.setState({
-                    allCheers: data.allcheers
-                });
-            });
-
+        this.getAllCheers();
+     
         fetch('api/Account/GetUser')
             .then(function (response) {
                 // The response is a Response instance.
@@ -69,6 +58,25 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
                 });
 
             });
+
+
+    }
+
+    getAllCheers(){
+        let that = this;
+        fetch('api/CheerTimeline/Getallcheers')
+            .then(function (response) {
+                // The response is a Response instance.
+                // You parse the data into a useable format using `.json()`
+                return response.json();
+
+            }).then(function (data) {
+                console.log(data);
+
+                that.setState({
+                    allCheers: data.allcheers
+                });
+            });
     }
 
     handleCheerToInputText(e: any) {
@@ -96,7 +104,8 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
             })
         }).then(function (data) {
             console.log(that.state.cheerTo + " - " + that.state.cheerText);
-            that.setState({ show: false, cheerPanel: false });
+            that.setState({ cheerPanel: false });
+            that.getAllCheers();
         });
     }
 
@@ -113,16 +122,18 @@ export class CheerTimeline extends React.Component<RouteComponentProps<{}>, any>
                     <Panel.Collapse>
                         <Panel.Body>
                             <form>
-                                <InputGroup>
-                                    <InputGroup.Addon>To: </InputGroup.Addon>
-                                    <FormControl componentClass="select" placeholder="select" onChange={this.handleCheerToInputText}>
-                                        <option value="select">Select</option>
-                                        {this.state.allUsers.map((user: any, i: any) => {
-                                            // Return the element. Also pass key     
-                                            return (<option key={i} value={user.upn}>{user.fullName}</option>)
-                                        })}
-                                    </FormControl>
-                                </InputGroup>
+                                <FormGroup>
+                                    <InputGroup>
+                                        <InputGroup.Addon>To:</InputGroup.Addon>
+                                        <FormControl componentClass="select" placeholder="select" onChange={this.handleCheerToInputText}>
+                                            <option value="select">Select</option>
+                                            {this.state.allUsers.map((user: any, i: any) => {
+                                                // Return the element. Also pass key     
+                                                return (<option key={i} value={user.upn}>{user.fullName}</option>)
+                                            })}
+                                        </FormControl>
+                                    </InputGroup>
+                                </FormGroup>
                                 <FormGroup bsSize="large">
                                     <FormControl name="CheerTextControl" type="text" placeholder="type here" onChange={this.handleCheerTextChange} />
                                 </FormGroup>

@@ -33,11 +33,6 @@ export class NavMenu extends React.Component<{}, {}> {
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to={ '/feedback' } activeClassName='active'>
-                                <span className='glyphicon 	glyphicon glyphicon-list-alt'></span> Feedback
-                            </NavLink>
-                        </li>
-                        <li>
                             <a href={'/AzureAd/Account/SignOut'} >
                                 <span className='glyphicon glyphicon-log-out'></span> Sign Out
                             </a>
