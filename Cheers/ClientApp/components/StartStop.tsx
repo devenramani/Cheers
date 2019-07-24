@@ -7,17 +7,48 @@ export class StartStop extends React.Component<RouteComponentProps<{}>, any> {
     constructor(props: any) {
         super(props);
 
-        this.state = {
+        this.sendStartStop = this.sendStartStop.bind(this);
+        this.handleActionControl = this.handleActionControl.bind(this);
+        this.handleStartStopSubjectChange = this.handleStartStopSubjectChange.bind(this);
+        this.handleStartStopTextChange = this.handleStartStopTextChange.bind(this);
+        this.getAllStartStops = this.getAllStartStops.bind(this);
 
+        this.state = {
             allStartStop: [],
             StartStopPanel: false,
             userName: "",
-            show: false,
-            UPN: ''
+            UPN: '',
+            action: "Action",
+            StartStopText: "",
+            StartStopSubject: ""
         };
     }
 
     componentDidMount() {
+
+        let that = this;
+
+        this.getAllStartStops();
+        
+        fetch('api/Account/GetUser')
+            .then(function (response) {
+                // The response is a Response instance.
+                // You parse the data into a useable format using `.json()`
+                return response.json();
+
+            }).then(function (data) {
+                console.log(data);
+
+                that.setState({
+                    userName: data.fullName,
+                    UPN: data.upn
+                });
+            });
+
+            
+    }
+
+    getAllStartStops(){
 
         let that = this;
         fetch('api/startstop/GetAllStartStops')
@@ -33,27 +64,53 @@ export class StartStop extends React.Component<RouteComponentProps<{}>, any> {
                     allStartStop: data.allStartStops
                 });
             });
+    }
 
-        fetch('api/Account/GetUser')
-            .then(function (response) {
-                // The response is a Response instance.
-                // You parse the data into a useable format using `.json()`
-                return response.json();
+    handleActionControl(eventKey: any) {
+        this.setState({
+            action: eventKey
+        });
+    }
 
-            }).then(function (data) {
-                console.log(data);
+    handleStartStopSubjectChange(e: any) {
+        this.setState({ StartStopSubject: e.target.value });
+        console.log(this.state.StartStopSubject);
+    }
 
-                that.setState({
-                    userName: data.fullName,
-                    UPN: data.upn
-                });
-            });
+    handleStartStopTextChange(e: any) {
+        this.setState({ StartStopText: e.target.value });
+        console.log(this.state.StartStopText);
+    }
+
+
+    sendStartStop() {
+        console.log("send");
+
+        let that = this;
+        fetch('api/startstop/SendStartStop', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                Title: this.state.action,
+                Subject: this.state.StartStopSubject,
+                TimeStamp: new Date().toISOString(),
+                Text: this.state.StartStopText,
+                From: this.state.UPN
+            })
+        }).then(function (data) {
+            //console.log(that.state.action + " - " + that.state.StartStopSubject);
+            that.setState({ StartStopPanel: false });
+            that.getAllStartStops();
+        });
     }
 
 
     public render() {
 
-        var cardClass = {Start:"success",Stop:"danger"};
+        let cardClass: any = { Start: "success", Stop: "danger" };
         return (
             <div>
                 <h1>Start/Stop Timeline</h1>
@@ -67,22 +124,23 @@ export class StartStop extends React.Component<RouteComponentProps<{}>, any> {
                             <form>
                                 <FormGroup>
                                     <InputGroup>
-                                        <FormControl type="text" />
-                                        <DropdownButton
+
+                                        <DropdownButton onSelect={this.handleActionControl}
                                             componentClass={InputGroup.Button}
                                             id="input-dropdown-addon"
-                                            title={"Action"}
+                                            title={this.state.action}
                                         >
-                                            <MenuItem key="Start">Start</MenuItem>
-                                            <MenuItem key="Stop">Stop</MenuItem>
+                                            <MenuItem eventKey="Start">Start</MenuItem>
+                                            <MenuItem eventKey="Stop">Stop</MenuItem>
                                         </DropdownButton>
+                                        <FormControl type="text" placeholder="Subject" onChange={this.handleStartStopSubjectChange} />
                                     </InputGroup>
                                 </FormGroup>
                                 <FormGroup bsSize="large">
-                                    <FormControl name="CheerTextControl" type="text" placeholder="type here" />
+                                    <FormControl name="CheerTextControl" type="text" placeholder="type here" onChange={this.handleStartStopTextChange} />
                                 </FormGroup>
                             </form>
-                            <Button bsStyle="primary" >Send</Button>
+                            <Button bsStyle="primary" onClick={this.sendStartStop} >Send</Button>
                         </Panel.Body>
                     </Panel.Collapse>
                 </Panel>
@@ -90,7 +148,7 @@ export class StartStop extends React.Component<RouteComponentProps<{}>, any> {
                 {this.state.allStartStop.map((ss: any, i: any) => {
                     // Return the element. Also pass key     
                     return (
-                        <Panel key={i} bsStyle={cardClass.Start} >
+                        <Panel key={i} bsStyle={cardClass[ss.title]} >
                             <Panel.Heading>
                                 <Panel.Title componentClass="h3"><b>{ss.title} : {ss.subject}</b></Panel.Title>
                             </Panel.Heading>
